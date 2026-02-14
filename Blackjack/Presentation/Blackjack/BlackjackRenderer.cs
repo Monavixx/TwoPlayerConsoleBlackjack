@@ -7,6 +7,18 @@ public sealed class BlackjackRenderer : IDisposable
     private bool _fullRenderRequired = true;
     private List<Card> _addedCards = [];
     private readonly Domain.Blackjack _blackjack;
+    private bool _stopRendering = false;
+
+    public void Wait()
+    {
+        _stopRendering = true;
+    }
+
+    public void Continue()
+    {
+        _stopRendering = false;
+        _fullRenderRequired = true;
+    }
 
     public BlackjackRenderer(Domain.Blackjack blackjack)
     {
@@ -39,24 +51,22 @@ public sealed class BlackjackRenderer : IDisposable
             _blackjack.State.CurrentPlayer.CardAdded += CurrentPlayerOnCardAdded;
         }
         _fullRenderRequired = true;
-        _addedCards.Clear();
     }
     private void BlackjackOnGameEnded()
     {
         _fullRenderRequired = true;
-        _addedCards.Clear();
     }
 
     private void BlackjackOnGameStarted()
     {
         _fullRenderRequired = true;
-        _addedCards.Clear();
     }
 
     public void Render()
     {
-        if (_fullRenderRequired)
+        if (_fullRenderRequired && !_stopRendering)
         {
+            _addedCards.Clear();
             Console.Clear();
             FullRender();
         }

@@ -17,6 +17,7 @@ public class BlackjackScreen : Screen
         _blackjack.GameEnded += BlackjackOnGameEnded;
         _blackjack.GameStarted += BlackjackOnGameStarted;
     }
+    
 
     private void BlackjackOnGameStarted()
     {
@@ -25,7 +26,26 @@ public class BlackjackScreen : Screen
 
     private void BlackjackOnGameEnded()
     {
+        _renderer.Wait();
+        _shouldWaitForTimerBeforeNextStage = true;
         SetInputState(new BlackjackEndGameInputState(_blackjack));
+    }
+
+    private TimeSpan _timerBeforeNextStage = TimeSpan.Zero;
+    private bool _shouldWaitForTimerBeforeNextStage = false;
+    public override void Update(TimeSpan deltaTime)
+    {
+        base.Update(deltaTime);
+        if (_shouldWaitForTimerBeforeNextStage)
+        {
+            _timerBeforeNextStage += deltaTime;
+            if (_timerBeforeNextStage > TimeSpan.FromSeconds(2))
+            {
+                _renderer.Continue();
+                _shouldWaitForTimerBeforeNextStage = false;
+                _timerBeforeNextStage = TimeSpan.Zero;
+            }
+        }
     }
 
     public override void Render()
